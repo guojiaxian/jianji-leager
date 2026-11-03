@@ -1,0 +1,11 @@
+{
+  "appId": "com.jianji.app",
+  "appName": "简记",
+  "webDir": "../expense-app",
+  "android": {
+    "backgroundColor": "#F4F0E6"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

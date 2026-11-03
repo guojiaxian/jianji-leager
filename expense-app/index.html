@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#F4F0E6">
+  <script>
+    // 尽早应用主题，避免深色下闪白（与 app.js 的 THEME_KEY 保持一致）
+    (function () {
+      try {
+        var p = localStorage.getItem('jianji_theme');
+        var dark = p === 'dark' || ((p === null || p === 'auto') &&
+          window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute('content', '#1B1813');
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="简记">
+  <title>简记 · 账本</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css?v=20260920e">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== 启动页 ===== -->
+  <div class="splash" id="splash">
+    <div class="splash-inner">
+      <div class="splash-logo">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="58" height="58" rx="15" fill="#FDFBF4" stroke="#26221A" stroke-opacity="0.08"/>
+          <rect x="4.5" y="4.5" width="55" height="55" rx="13.5" fill="none" stroke="#B93A21" stroke-opacity="0.22"/>
+          <path class="draw" pathLength="100" d="M18 46 C24 40 30 33 37 23 S49 13.5 50.5 13" fill="none" stroke="#26221A" stroke-width="4.4" stroke-linecap="round"/>
+          <circle class="seal-dot" cx="49.5" cy="14" r="4.6" fill="#B93A21"/>
+          <line class="gold-line" x1="16" y1="35.5" x2="28" y2="35.5" stroke="#A67C2E" stroke-width="2.6" stroke-linecap="round"/>
+        </svg>
+        <span class="splash-ink" aria-hidden="true"></span>
+      </div>
+      <h1 class="splash-brand">简记</h1>
+      <p class="splash-tagline"><i class="tagline-dot"></i>每一笔&nbsp;都值得记录</p>
+      <p class="splash-foot">纸墨 · 记账</p>
+    </div>
+  </div>
+
+  <!-- ===== 顶栏 ===== -->
+  <header id="appHeader">
+    <div class="brand">
+      <span class="brand-seal brand-seal--logo">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="58" height="58" rx="15" fill="#FDFBF4" stroke="#26221A" stroke-opacity="0.08"/>
+          <path d="M18 46 C24 40 30 33 37 23 S49 13.5 50.5 13" fill="none" stroke="#26221A" stroke-width="4.4" stroke-linecap="round"/>
+          <circle cx="49.5" cy="14" r="4.6" fill="#B93A21"/>
+          <line x1="16" y1="35.5" x2="28" y2="35.5" stroke="#A67C2E" stroke-width="2.6" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="brand-name">简记</span>
+    </div>
+    <span class="header-caption" id="headerCaption"></span>
+  </header>
+
+  <!-- ===== 首页 ===== -->
+  <main class="page active" id="page-home">
+    <section class="hero">
+      <p class="hero-label">今日支出</p>
+      <p class="hero-amount fig"><span class="yen">¥</span><span id="todayAmount">0.00</span></p>
+      <div class="hero-meta">
+        <div class="hero-meta-item"><span>本周</span><b class="fig" id="weekAmount">¥0</b></div>
+        <div class="hero-divider"></div>
+        <div class="hero-meta-item"><span>本月</span><b class="fig" id="monthAmount">¥0</b></div>
+        <div class="hero-divider"></div>
+        <div class="hero-meta-item"><span>本月收入</span><b class="fig income-val" id="monthIncome">¥0</b></div>
+      </div>
+    </section>
+
+    <div class="quick-row">
+      <button class="quick-btn" onclick="goExpenseEntry()">
+        <span class="quick-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </span>
+        <span class="quick-txt">记一笔</span>
+      </button>
+      <button class="quick-btn" onclick="startPhotoAccounting()">
+        <span class="quick-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.6l1.4-2h6.9l1.4 2h1.7A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        </span>
+        <span class="quick-txt">拍一张</span>
+      </button>
+      <button class="quick-btn" onclick="goIncomeEntry()">
+        <span class="quick-ico jade">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M17 7.5c0-1.9-2.2-3-5-3s-5 1.1-5 3 2.2 2.8 5 3.2 5 1.2 5 3.3-2.2 3-5 3-5-1.1-5-3"/></svg>
+        </span>
+        <span class="quick-txt">记收入</span>
+      </button>
+    </div>
+
+    <section class="panel flow-panel">
+      <div class="panel-head">
+        <h2>账单流水</h2>
+        <button class="link-btn" onclick="navigateTo('bills')">全部 <span class="chev">›</span></button>
+      </div>
+      <div id="homeFlow"></div>
+      <div class="flow-end" id="homeFlowEnd"></div>
+    </section>
+  </main>
+
+  <!-- ===== 记账 ===== -->
+  <main class="page" id="page-add">
+    <div class="seg" id="addSeg">
+      <div class="seg-ind" id="addSegInd"></div>
+      <button class="active" data-tab="manual" onclick="switchAddTab('manual')">手动记账</button>
+      <button data-tab="auto" onclick="switchAddTab('auto')">拍一张</button>
+    </div>
+
+    <!-- 手动 -->
+    <div class="tab-content active" id="tab-manual">
+      <div class="edit-banner" id="editBanner" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span>正在编辑既有账目</span>
+        <button type="button" onclick="cancelEdit()">取消</button>
+      </div>
+      <section class="panel amount-panel">
+        <div class="flow-toggle" id="flowToggle">
+          <button class="active" data-flow="expense" onclick="switchManualFlow('expense')">支出</button>
+          <button data-flow="income" onclick="switchManualFlow('income')">收入</button>
+        </div>
+        <p class="field-label" id="manualAmountLabel">金额</p>
+        <div class="amount-display fig">
+          <span class="yen">¥</span>
+          <input type="text" id="manualAmount" placeholder="0.00" inputmode="decimal" autocomplete="off">
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>分类</h2></div>
+        <div class="cat-grid" id="categoryGrid"></div>
+        <div id="subcategorySection" hidden>
+          <div class="panel-head sub-head"><h2>子分类</h2></div>
+          <div class="chip-row" id="subcategoryList"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="form-row">
+          <div class="form-cell">
+            <label>日期</label>
+            <input type="date" id="manualDate">
+          </div>
+          <div class="form-cell">
+            <label>时间</label>
+            <input type="time" id="manualTime">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-cell wide">
+            <label>备注</label>
+            <input type="text" id="manualNote" placeholder="写点什么…（可选）" maxlength="50">
+          </div>
+        </div>
+      </section>
+
+      <button class="btn-solid btn-block" id="manualSubmitBtn" onclick="saveManualEntry()">记 入</button>
+    </div>
+
+    <!-- 拍照 -->
+    <div class="tab-content" id="tab-auto">
+      <div class="upload-zone" id="uploadZone" onclick="pickOcrImages()">
+        <div class="upload-empty" id="uploadEmpty">
+          <span class="upload-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.6l1.4-2h6.9l1.4 2h1.7A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          </span>
+          <p class="upload-title">上传订单截图</p>
+          <p class="upload-sub">微信 · 支付宝 · 淘宝 · 京东 · 拼多多 · 纸质小票</p>
+          <p class="upload-hint">支持多张 · 选图后自动识别</p>
+        </div>
+        <div class="upload-preview" id="uploadPreviewWrap" hidden>
+          <div class="thumb-grid" id="thumbGrid"></div>
+          <div class="scan-status" id="scanStatus">正在识别…</div>
+          <button class="re-pick" onclick="event.stopPropagation();pickOcrImages()">再加几张</button>
+        </div>
+      </div>
+      <input type="file" id="ocrFileInput" accept="image/*" multiple hidden onchange="handleOcrFile(event)">
+      <p class="auto-tip">识别结果将自动填入，确认后一并记入账本</p>
+    </div>
+  </main>
+
+  <!-- ===== 统计 ===== -->
+  <main class="page" id="page-stats">
+    <div class="seg seg-five" id="statsSeg">
+      <button class="active" data-period="day" onclick="switchStatsPeriod('day')">日</button>
+      <button data-period="week" onclick="switchStatsPeriod('week')">周</button>
+      <button data-period="month" onclick="switchStatsPeriod('month')">月</button>
+      <button data-period="year" onclick="switchStatsPeriod('year')">年</button>
+      <button data-period="all" onclick="switchStatsPeriod('all')">全部</button>
+    </div>
+
+    <div class="date-nav" id="statsDateNav">
+      <button onclick="changeStatsDate(-1)">‹</button>
+      <span class="date-label" id="statsDateDisplay">今天</span>
+      <button onclick="changeStatsDate(1)">›</button>
+    </div>
+
+    <section class="panel stat-hero">
+      <p class="hero-label" id="statsPeriodLabel">今日支出</p>
+      <p class="hero-amount fig"><span class="yen">¥</span><span id="statsTotal">0.00</span></p>
+      <span class="compare-chip" id="statsCompare" hidden></span>
+      <div class="stat-grid">
+        <div class="stat-cell"><b class="fig" id="statsCount">0</b><span>笔数</span></div>
+        <div class="stat-cell"><b class="fig" id="statsAvg">¥0</b><span>平均单笔</span></div>
+        <div class="stat-cell"><b class="fig" id="statsMax">¥0</b><span>最大单笔</span></div>
+        <div class="stat-cell"><b class="fig" id="statsDailyAvg">¥0</b><span>日均</span></div>
+      </div>
+    </section>
+
+    <section class="panel income-panel" id="incomeCard" hidden>
+      <div class="panel-head income-head"><h2>收入概览</h2><span class="income-total fig" id="incomeTotal">¥0</span></div>
+      <div class="stat-grid income-grid">
+        <div class="stat-cell"><b class="fig" id="incomeCount">0</b><span>收入笔数</span></div>
+        <div class="stat-cell"><b class="fig" id="incomeAvg">¥0</b><span>平均单笔</span></div>
+        <div class="stat-cell"><b class="fig" id="incomeMax">¥0</b><span>最大单笔</span></div>
+        <div class="stat-cell"><b class="fig" id="incomeNet">¥0</b><span>本期结余</span></div>
+      </div>
+      <div class="hbar-list" id="incomeRank"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>分类构成</h2></div>
+      <div class="donut-wrap"><canvas id="pieChart"></canvas></div>
+      <div class="legend" id="pieLegend"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>分类排行</h2></div>
+      <div class="rank-list" id="categoryRank"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>子分类 TOP5</h2></div>
+      <div class="rank-list" id="subcatRank"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>消费时段</h2></div>
+      <div class="hbar-list" id="timeDist"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>支出趋势</h2><span class="muted" id="trendUnit"></span></div>
+      <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>记录方式</h2></div>
+      <div class="hbar-list" id="typeDist"></div>
+    </section>
+  </main>
+
+  <!-- ===== 明细 ===== -->
+  <main class="page" id="page-bills">
+    <div class="search-bar">
+      <div class="sb-field">
+        <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="text" id="billsSearchInput" placeholder="搜索备注 / 商品 / 商家 / 分类" enterkeyhint="search" autocomplete="off">
+        <button type="button" class="sb-clear" id="billsSearchClear" hidden onclick="clearBillsSearchInput()" title="清空关键词">✕</button>
+      </div>
+      <button type="button" class="sb-filter" id="billsFilterBtn" onclick="toggleBillsFilter()">筛选<i class="sb-dot" id="filterActiveDot" hidden></i></button>
+    </div>
+
+    <div class="filter-panel" id="billsFilterPanel" hidden>
+      <div class="fp-group">
+        <span class="fp-label">收支</span>
+        <div class="fp-chips" id="filterFlowChips"></div>
+      </div>
+      <div class="fp-group">
+        <span class="fp-label">时间</span>
+        <div class="fp-chips" id="filterRangeChips"></div>
+      </div>
+      <div class="fp-group" id="filterCatGroup">
+        <span class="fp-label">分类</span>
+        <div class="fp-chips" id="filterCatChips"></div>
+      </div>
+      <div class="fp-group" id="filterPlatformGroup">
+        <span class="fp-label">平台</span>
+        <div class="fp-chips" id="filterPlatformChips"></div>
+      </div>
+      <div class="fp-group">
+        <span class="fp-label">金额</span>
+        <div class="fp-amount">
+          <input type="text" id="filterAmountMin" inputmode="decimal" placeholder="最小" autocomplete="off">
+          <span class="fp-dash">—</span>
+          <input type="text" id="filterAmountMax" inputmode="decimal" placeholder="最大" autocomplete="off">
+        </div>
+      </div>
+      <div class="fp-actions">
+        <button type="button" class="btn-ghost" onclick="resetBillsFilters()">重置</button>
+        <button type="button" class="btn-solid" onclick="toggleBillsFilter()">收起</button>
+      </div>
+    </div>
+
+    <section class="panel search-summary" id="billsSearchSummary" hidden></section>
+
+    <section class="panel" id="calendarCard">
+      <div class="panel-head cal-head">
+        <h2>日历</h2>
+        <div class="mini-nav">
+          <button onclick="changeBillsMonth(-1)">‹</button>
+          <span class="date-label" id="calendarMonthDisplay"></span>
+          <button onclick="changeBillsMonth(1)">›</button>
+        </div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="cal-legend"><i class="l1"></i><i class="l2"></i><i class="l3"></i><span>单日支出由少到多</span></div>
+      <p class="cal-hint">点选日期，下方只看这一天的账目</p>
+    </section>
+
+    <section class="panel month-summary" id="billsMonthSummary"></section>
+
+    <div id="billsList"></div>
+  </main>
+
+  <!-- ===== 设置 ===== -->
+  <main class="page" id="page-settings">
+    <section class="panel">
+      <div class="panel-head"><h2>外观</h2></div>
+      <div class="seg seg-flat" id="themeSeg">
+        <button data-theme-pref="auto" onclick="setThemePref('auto')">跟随系统</button>
+        <button data-theme-pref="light" onclick="setThemePref('light')">宣纸</button>
+        <button data-theme-pref="dark" onclick="setThemePref('dark')">夜墨</button>
+      </div>
+      <p class="muted" id="themeHint"></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>识图模型</h2></div>
+      <div class="form-row">
+        <div class="form-cell wide">
+          <label>API 地址</label>
+          <input type="text" id="settingsApiUrl" placeholder="https://…">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-cell wide">
+          <label>API Key</label>
+          <div class="key-wrap">
+            <input type="password" id="settingsApiKey" placeholder="密钥" autocomplete="off">
+            <button type="button" class="key-eye" id="apiKeyEye" onclick="toggleApiKeyVisible()" title="显示/隐藏">👁</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-cell wide">
+          <label>模型名称</label>
+          <input type="text" id="settingsModel" placeholder="glm-4.6v">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-cell wide">
+          <label>识图提示词</label>
+          <textarea id="settingsPrompt" rows="7"></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-ghost" id="testConnBtn" onclick="testApiConnection()">测试连接</button>
+        <button class="btn-solid" onclick="saveApiSettings()">保存配置</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>分类管理</h2></div>
+      <div id="settingsCategories"></div>
+      <button class="btn-ghost btn-block" onclick="addCategory()">＋ 添加分类</button>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>数据</h2></div>
+      <button class="btn-ghost btn-block" onclick="exportData()">导出数据（JSON）</button>
+      <button class="btn-ghost btn-block" onclick="document.getElementById('importFileInput').click()">导入数据（JSON）</button>
+      <input type="file" id="importFileInput" accept=".json,application/json,text/plain" hidden onchange="handleImportFile(event)">
+      <button class="btn-danger-ghost btn-block" onclick="clearAllData()">清除全部账目</button>
+    </section>
+
+    <p class="app-foot">简记 · 数据仅存于本机</p>
+  </main>
+
+  <!-- ===== 底部导航 ===== -->
+  <nav class="tabbar">
+    <button class="tab-item active" data-page="home" onclick="navigateTo('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
+      <span>首页</span>
+    </button>
+    <button class="tab-item" data-page="stats" onclick="navigateTo('stats')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20v-8"/><path d="M11 20V5"/><path d="M17 20v-11"/><path d="M3 20h18"/></svg>
+      <span>统计</span>
+    </button>
+    <button class="tab-add" id="tabAddBtn" onclick="navigateTo('add')" aria-label="记账">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+    </button>
+    <button class="tab-item" data-page="bills" onclick="navigateTo('bills')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3.5 6h.01"/><path d="M3.5 12h.01"/><path d="M3.5 18h.01"/></svg>
+      <span>明细</span>
+    </button>
+    <button class="tab-item" data-page="settings" onclick="navigateTo('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3"/><path d="M12 18.2v3"/><path d="M2.8 12h3"/><path d="M18.2 12h3"/><path d="M5.5 5.5l2.1 2.1"/><path d="M16.4 16.4l2.1 2.1"/><path d="M18.5 5.5l-2.1 2.1"/><path d="M7.6 16.4l-2.1 2.1"/></svg>
+      <span>设置</span>
+    </button>
+  </nav>
+
+  <!-- ===== OCR 结果底部弹层（多笔） ===== -->
+  <div class="sheet-mask" id="ocrSheetMask" onclick="closeOcrSheet()"></div>
+  <div class="sheet" id="ocrSheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <h3>识别结果</h3>
+      <span class="ocr-summary" id="ocrSummary"></span>
+    </div>
+    <div class="sheet-body">
+      <div id="ocrCards"></div>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-ghost" onclick="resetOcr()">重新选图</button>
+      <button class="btn-solid" id="ocrSaveBtn" onclick="saveOcrEntries()">全部记入</button>
+    </div>
+  </div>
+
+  <!-- ===== 订单详情弹窗 ===== -->
+  <div class="modal-mask" id="txDetailMask" onclick="closeTxDetail()"></div>
+  <div class="tx-modal" id="txDetailModal">
+    <button class="tx-modal-close" onclick="closeTxDetail()" title="关闭">✕</button>
+    <div id="txDetailBody"></div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+</div>
+
+<script src="js/data.js?v=20260920e"></script>
+  <script src="js/api.js?v=20260920e"></script>
+  <script src="js/app.js?v=20260920e"></script>
+</body>
+</html>

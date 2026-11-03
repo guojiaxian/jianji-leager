@@ -1,0 +1,20 @@
+{
+  "name": "简记 · 账本",
+  "short_name": "简记",
+  "description": "每一笔都值得记录 · 简约记账",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F0E6",
+  "theme_color": "#F4F0E6",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

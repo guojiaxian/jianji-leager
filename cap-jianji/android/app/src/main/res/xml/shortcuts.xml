@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  长按桌面图标弹出的快捷方式：
+  记一笔 → 直达手动记账页（支出）
+  拍一张 → 直达拍照识别页并唤起选图
+  两者都通过 MainActivity 的 SHORTCUT action + extra 传递，避免与分享/打开的 intent-filter 冲突
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_expense"
+        android:shortcutId="expense"
+        android:shortcutLongLabel="@string/shortcut_expense_long"
+        android:shortcutShortLabel="@string/shortcut_expense_short">
+        <intent
+            android:action="com.jianji.app.action.SHORTCUT"
+            android:targetClass="com.jianji.app.MainActivity"
+            android:targetPackage="com.jianji.app">
+            <extra
+                android:name="com.jianji.app.extra.SHORTCUT"
+                android:value="expense" />
+        </intent>
+    </shortcut>
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_photo"
+        android:shortcutId="photo"
+        android:shortcutLongLabel="@string/shortcut_photo_long"
+        android:shortcutShortLabel="@string/shortcut_photo_short">
+        <intent
+            android:action="com.jianji.app.action.SHORTCUT"
+            android:targetClass="com.jianji.app.MainActivity"
+            android:targetPackage="com.jianji.app">
+            <extra
+                android:name="com.jianji.app.extra.SHORTCUT"
+                android:value="photo" />
+        </intent>
+    </shortcut>
+
+</shortcuts>

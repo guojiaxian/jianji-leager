@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">简记</string>
+    <string name="title_activity_main">简记</string>
+    <string name="package_name">com.jianji.app</string>
+    <string name="custom_url_scheme">com.jianji.app</string>
+
+    <!-- 长按图标快捷方式 -->
+    <string name="shortcut_expense_short">记一笔</string>
+    <string name="shortcut_expense_long">记一笔支出</string>
+    <string name="shortcut_photo_short">拍一张</string>
+    <string name="shortcut_photo_long">拍小票自动记账</string>
+
+    <!-- 桌面小组件 -->
+    <string name="widget_name">简记 · 今日账</string>
+    <string name="widget_desc">今日支出与本月收支</string>
+    <string name="widget_today_label">今日支出</string>
+    <string name="widget_today_placeholder">¥0.00</string>
+    <string name="widget_month_expense_fmt">本月支出 %1$s</string>
+    <string name="widget_month_income_fmt">本月收入 %1$s</string>
+</resources>
